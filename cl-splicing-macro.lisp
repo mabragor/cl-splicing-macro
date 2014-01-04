@@ -70,18 +70,38 @@
 		(setf (gethash ',name *splicing-macro*) t)))))
 
 (let (installed)
-  (defun enable-splicing-macro ()
+  (defun %enable-splicing-macro ()
     (if (not installed)
 	(progn (setf installed *macroexpand-hook*)
 	       (setf *macroexpand-hook* (mk-splicing-macroexpand-hook installed))
 	       t)
 	(format t "Splicing macro already enabled, doing nothing.")))
-  (defun disable-splicing-macro ()
+  (defun %disable-splicing-macro ()
     (if installed
 	(progn (setf *macroexpand-hook* installed)
 	       (setf installed nil)
 	       t)
 	(format t "Splicing macro already disabled, doing nothing."))))
+
+(defmacro enable-splicing-macro ()
+  `(eval-when (:compile-toplevel :load-toplevel :execute)
+     (%enable-splicing-macro)))
+
+(defmacro disable-splicing-macro ()
+  `(eval-when (:compile-toplevel :load-toplevel :execute)
+     (%disable-splicing-macro)))
+
+;; (defmacro with-splicing-macro (&body body)
+;;   (unwind-protect (progn (enable-splicing-macro)
+;; 			 `(progn ,@body))
+;;      (disable-splicing-macro)))
+
+
+(defmacro with-splicing-macro-runtime (&body body)
+  `(unwind-protect (progn (enable-splicing-macro)
+			  ,@body)
+     (disable-splicing-macro)))
+     
 
 ;; OK, now that I have a basic skeleton of my project, time to
 ;; write something nontrivial!)
