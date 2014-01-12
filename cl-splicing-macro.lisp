@@ -48,13 +48,20 @@
 	  (push (car cur) res)))
     (values (nreverse res) sample got-sample)))
 
-(defmacro define-maybe-sampling-macro (name lambda-list &rest body)
-  (multiple-value-bind (residual-list sample got) (parse-sample-from-lambda-list lambda-list)
-    `(progn (defmacro ,name ,residual-list ,@body)
-	    ,(if got
-		 `(setf (gethash ',name *sample-expansion-data*) 
-			',sample)))))
-		
+(defmacro define-/sampling! (src-name dst-name)
+  "Define macro SRC-NAME on top of DST-NAME.
+Adds possibility to specify sample macroexpansion data, via &SAMPLE magic word in ARGS.
+Expects ARGS list to contain ARGS variable, which contains lambda-list."
+  `(defmacro ,src-name (name args &body body)
+     (multiple-value-bind (args sample got) (parse-sample-from-lambda-list args)
+       `(progn (,',dst-name ,name ,args ,@body)
+	       ,(if got
+		    `(setf (gethash ',name *sample-expansion-data*) 
+			   ',sample))))))
+	       
+
+(define-/sampling! define-maybe-sampling-macro defmacro)
+
 (defmacro testing-expansion (name &environment env)
   (multiple-value-bind (sample-expansion-data got) (gethash name *sample-expansion-data*)
      (if (not got)
