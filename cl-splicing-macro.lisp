@@ -69,12 +69,15 @@ Expects ARGS list to contain ARGS variable, which contains lambda-list."
 	 `(values ',(macroexpand-1 `(,name ,@sample-expansion-data) env)
 		  t))))
 
-(defmacro define-maybe-splicing-macro (name lambda-list &rest body)
-  `(progn (define-maybe-sampling-macro ,name ,lambda-list ,@body)
-	  (multiple-value-bind (expansion has-sample-expansion) (testing-expansion ,name)
-	    (if (and has-sample-expansion
-		     (eq (car expansion) 'sprogn))
-		(setf (gethash ',name *splicing-macro*) t)))))
+(defmacro define-/splicing! (src-name dst-name)
+  `(defmacro ,src-name (name lambda-list &body body)
+     `(progn (,',dst-name ,name ,lambda-list ,@body)
+	     (multiple-value-bind (expansion has-sample-expansion) (testing-expansion ,name)
+	       (if (and has-sample-expansion
+			(eq (car expansion) 'sprogn))
+		   (setf (gethash ',name *splicing-macro*) t))))))
+
+(define-/splicing! define-maybe-splicing-macro define-maybe-sampling-macro)
 
 (let (installed)
   (defun %enable-splicing-macro ()
