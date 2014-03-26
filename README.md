@@ -1,6 +1,9 @@
 cl-splicing-macro
 =================
 
+Features of this package are defmacro-enhance useable! (I.e. in DEFMACRO! from DEFMACRO-ENHANCE
+system both sampling expansion and splicing expansion can be used)
+
 This package adds a possibility for macros to inject several forms
 (not just one) into surrounding macros's body.
 
