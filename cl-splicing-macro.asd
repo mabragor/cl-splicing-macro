@@ -7,9 +7,10 @@
   :author "Alexandr Popolitov <popolit@gmail.com>"
   :license "GPL"
   :components ((:file "package")
-	       (:file "sbcl")
+	       #+sbcl (:file "sbcl")
                (:file "cl-splicing-macro")
-	       (:file "sbcl-2")))
+	       #+sbcl (:file "sbcl-2")
+	       ))
 	       
 
 (defsystem :cl-splicing-macro-tests
